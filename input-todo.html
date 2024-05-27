@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Input Todo</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container mx-auto p-4">
+      <h1 class="text-2xl font-bold mb-4">Input Todo</h1>
+      <form id="todo-form">
+        <div class="mb-4">
+          <label
+            for="todo-title"
+            class="block text-gray-700 text-sm font-bold mb-2"
+            >Title:</label
+          >
+          <input
+            type="text"
+            id="judul"
+            class="border border-gray-300 rounded px-2 py-1 w-full"
+            placeholder="Enter todo title"
+          />
+        </div>
+        <div class="mb-4">
+          <label
+            for="todo-date"
+            class="block text-gray-700 text-sm font-bold mb-2"
+            >Date:</label
+          >
+          <input
+            type="date"
+            id="tanggal"
+            class="border border-gray-300 rounded px-2 py-1 w-full"
+          />
+        </div>
+        <div class="mb-4">
+          <label
+            for="todo-description"
+            class="block text-gray-700 text-sm font-bold mb-2"
+            >Description:</label
+          >
+          <textarea
+            id="acara"
+            class="border border-gray-300 rounded px-2 py-1 w-full"
+            placeholder="Enter todo description"
+          ></textarea>
+        </div>
+        <button
+          type="submit"
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Add Todo
+        </button>
+      </form>
+      <a href="getAll.html" class="text-blue-500 mt-4">View All Todos</a>
+    </div>
+
+    <script>
+      const todoForm = document.getElementById("todo-form");
+
+      todoForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const judul = document.getElementById("judul").value;
+        const tanggal = document.getElementById("tanggal").value;
+        const acara = document.getElementById("acara").value;
+
+        fetch("http://localhost:8000/todos", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ judul, tanggal, acara }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Todo submitted:", data);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      });
+    </script>
+  </body>
+</html>

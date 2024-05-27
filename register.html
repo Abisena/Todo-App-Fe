@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container mx-auto p-4">
+      <h1 class="text-2xl font-bold mb-4">Register</h1>
+      <form id="register-form">
+        <div class="mb-4">
+          <label
+            for="username"
+            class="block text-gray-700 text-sm font-bold mb-2"
+            >Username:</label
+          >
+          <input
+            type="text"
+            id="username"
+            class="border border-gray-300 rounded px-2 py-1 w-full"
+            placeholder="Enter your username"
+          />
+        </div>
+        <div class="mb-4">
+          <label for="email" class="block text-gray-700 text-sm font-bold mb-2"
+            >Email:</label
+          >
+          <input
+            type="email"
+            id="email"
+            class="border border-gray-300 rounded px-2 py-1 w-full"
+            placeholder="Enter your email"
+          />
+        </div>
+        <div class="mb-4">
+          <label
+            for="password"
+            class="block text-gray-700 text-sm font-bold mb-2"
+            >Password:</label
+          >
+          <input
+            type="password"
+            id="password"
+            class="border border-gray-300 rounded px-2 py-1 w-full"
+            placeholder="Enter your password"
+          />
+        </div>
+        <div class="mb-4">
+          <label
+            for="password-confirm"
+            class="block text-gray-700 text-sm font-bold mb-2"
+            >Confirm Password:</label
+          >
+          <input
+            type="password"
+            id="password-confirm"
+            class="border border-gray-300 rounded px-2 py-1 w-full"
+            placeholder="Confirm your password"
+          />
+        </div>
+        <button
+          type="submit"
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Register
+        </button>
+        <p class="text-center mt-4">
+          Have account?
+          <a href="login.html" class="text-blue-500">Login</a>
+        </p>
+      </form>
+    </div>
+    <script>
+      const registerForm = document.getElementById("register-form");
+
+      registerForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const username = document.getElementById("username").value;
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        fetch("http://localhost:8000/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, email, password }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Registration successful:", data);
+            window.location.href = "login.html";
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      });
+    </script>
+  </body>
+</html>

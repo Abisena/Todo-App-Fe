@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>All Todos</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.5/dist/sweetalert2.all.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.5/dist/sweetalert2.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <style>
+      .kawaii-button {
+        transition: background-color 0.3s ease, transform 0.3s ease;
+      }
+      .kawaii-button:hover {
+        transform: scale(1.05);
+      }
+    </style>
+  </head>
+  <body class="bg-white">
+    <div class="container mx-auto p-4">
+      <h1 class="text-3xl font-bold mb-4 text-center text-black">All Todos</h1>
+      <div id="todo-list" class="flex flex-col space-y-4"></div>
+    </div>
+
+    <script>
+      fetch("http://localhost:8000/todos")
+        .then((response) => response.json())
+        .then((data) => {
+          const todoList = document.getElementById("todo-list");
+          data.forEach((todo) => {
+            const todoItem = document.createElement("div");
+            todoItem.classList.add(
+              "flex",
+              "items-center",
+              "justify-between",
+              "bg-white",
+              "shadow-md",
+              "rounded-lg",
+              "p-4"
+            );
+            todoItem.innerHTML = `
+            <div>
+              <h1 class="text-lg font-bold text-pink-700"><span class="font-bold">${
+                todo.Judul || "N/A"
+              }</span></h1>
+              <h3 class="text-gray-600"><span class="font-bold">${
+                todo.Acara || "N/A"
+              }</span></h3>
+              <h5 class="text-gray-600"><span class="font-bold">${
+                todo.Tanggal || "N/A"
+              }</span></h5>
+            </div>
+            <div class="flex space-x-2">
+              <button class="kawaii-button bg-blue-400 text-white px-3 py-2 rounded-lg hover:bg-blue-500" onclick="updateTodo(${
+                todo.Id
+              })">
+                <i class="fas fa-edit"></i> Update
+              </button>
+              <button class="kawaii-button bg-red-400 text-white px-3 py-2 rounded-lg hover:bg-red-500" onclick="deleteTodo(${
+                todo.Id
+              })">
+                <i class="fas fa-trash-alt"></i> Delete
+              </button>
+            </div>
+          `;
+            todoItem.dataset.todoId = todo.Id;
+            todoList.appendChild(todoItem);
+          });
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+
+      function updateTodo(id) {
+        console.log("Update todo with ID:", id);
+
+        Swal.fire({
+          title: "Update Todo",
+          html: `
+          <input id="titleInput" class="swal2-input" type="text" placeholder="Title">
+          <input id="eventInput" class="swal2-input" placeholder="Acara / Deskripsi">
+          <input id="dateInput" class="swal2-input" type="date" placeholder="Tanggal">
+        `,
+          showCancelButton: true,
+          confirmButtonText: "Update",
+          showLoaderOnConfirm: true,
+          preConfirm: () => {
+            const title = document.getElementById("titleInput").value;
+            const event = document.getElementById("eventInput").value;
+            const date = document.getElementById("dateInput").value;
+
+            return fetch(`http://localhost:8000/todos/${id}`, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                Judul: title,
+                Acara: event,
+                Tanggal: date,
+              }),
+            })
+              .then((response) => {
+                if (response.ok) {
+                  return response.json();
+                } else {
+                  return Promise.reject(response.statusText);
+                }
+              })
+              .catch((error) => {
+                Swal.showValidationMessage(`Request failed: ${error}`);
+              });
+          },
+          allowOutsideClick: () => !Swal.isLoading(),
+        }).then((result) => {
+          if (result.isConfirmed) {
+            Swal.fire("Updated!", "Your todo has been updated.", "success");
+            location.reload();
+          }
+        });
+      }
+
+      function deleteTodo(id) {
+        console.log("Delete todo with ID:", id);
+
+        Swal.fire({
+          title: "Are you sure?",
+          text: "You won't be able to revert this!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Yes, delete it!",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            fetch(`http://localhost:8000/todos/${id}`, {
+              method: "DELETE",
+            })
+              .then((response) => {
+                if (response.ok) {
+                  Swal.fire(
+                    "Deleted!",
+                    "Your todo has been deleted.",
+                    "success"
+                  );
+                  const todoItem = document.querySelector(
+                    `[data-todo-id="${id}"]`
+                  );
+                  todoItem.remove();
+                } else {
+                  Swal.fire(
+                    "Error!",
+                    "An error occurred while deleting the todo.",
+                    "error"
+                  );
+                }
+              })
+              .catch((error) => {
+                Swal.fire(
+                  "Error!",
+                  "An error occurred while deleting the todo.",
+                  "error"
+                );
+              });
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
